@@ -1,0 +1,1 @@
+This is a basic template for web app development.
