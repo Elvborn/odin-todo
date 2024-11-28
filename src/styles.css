@@ -181,15 +181,19 @@ body{
     grid-column: span 3;
 }
 
-#content #todo{
+#content .todo{
     --item-gap:.5rem;
 
     font-weight: bold;
 
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr auto auto;
     grid-auto-rows: auto;
     gap: var(--item-gap);
+}
+
+.todo .content-title{
+    grid-column: span 2;
 }
 
 .item-container{
@@ -197,6 +201,7 @@ body{
     --item-content-gap:1.5rem;
     --item-border-radius:1rem;
 
+    grid-column: span 3;
     position: relative;
     background-color: var(--primary-background-color);
     padding: var(--item-content-padding);
