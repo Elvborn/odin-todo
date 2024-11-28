@@ -14,4 +14,4 @@ for(let i=0; i < 10; i++){
 console.log(project);
 
 const projects = [project];
-display(projects);
+//display(projects);
