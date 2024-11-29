@@ -28,19 +28,71 @@
     </div>
 
     <div id="content" class="scrollable">
-        <div id="project-details">
-            <h2 class="content-title">Project #1</h2>
-            <button class="edit-button">Edit Project</button>
-            <button class="new-button">New Todo</button>
-            <div class="item-container">
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ducimus rem quaerat molestiae sapiente quas quisquam praesentium aperiam. Quaerat dolorum ea, dolorem doloribus odit, repellendus vel, fugiat expedita voluptate ratione numquam.
-            </div>
-        </div>
-
-        <div class="todo">
-            <h2 class="content-title">Todo #1</h2>
-            <button class="new-button">Add Item</button>
-        </div>
     </div>
+
+    <dialog id="project-dialog" closed>
+        <form method="dialog" id="project-form">
+            <legend>Create Project</legend>
+        
+            <div>
+                <label for="project-name">Project Name</label>
+                <input type="text" name="projectName" id="project-name" placeholder="Required" required>
+            </div>
+            <div>
+                <label for="project-description">Description</label>
+                <textarea name="projectDescription" id="project-description" rows="3"></textarea>
+            </div>
+            <div class="buttons">
+                <button class="delete-button" formnovalidate>Cancel</button>
+                <button id="project-submit" class="new-button" type="submit">Create</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="todo-dialog" closed>
+        <form method="dialog" id="todo-form">
+            <legend>Create Todo</legend>
+        
+            <div>
+                <label for="todo-name">Todo Name</label>
+                <input type="text" name="todoName" id="todo-name" placeholder="Required" required>
+            </div>
+
+            <div class="buttons">
+                <button class="delete-button" formnovalidate>Cancel</button>
+                <button id="todo-submit" class="new-button" type="submit">Create</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="item-dialog" closed>
+        <form method="dialog" id="item-form">
+            <legend>Create Todo Item</legend>
+        
+            <div>
+                <label for="item-name">Item Name</label>
+                <input type="text" name="itemName" id="item-name" placeholder="Required" required>
+            </div>
+
+            <div>
+                <label for="item-date">Due Date</label>
+                <input type="date" name="itemDate" id="item-date" placeholder="Required">
+            </div>
+
+            <div>
+                <label for="item-priority">Priority</label>
+                <select name="itemPriority" id="item-priority">
+                    <option value="0">Default</option>
+                    <option value="2">Important</option>
+                    <option value="1">Urgent</option>
+                </select>
+            </div>
+
+            <div class="buttons">
+                <button class="delete-button" formnovalidate>Cancel</button>
+                <button id="item-submit" class="new-button" type="submit">Create</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 </html>

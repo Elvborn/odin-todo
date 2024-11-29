@@ -1,8 +1,7 @@
 // DOM Elements
 const createProjectBtn = document.querySelector(".create-project");
-
 createProjectBtn.addEventListener("click", () => {
-    PubSub.publish("CREATE-PROJECT", "name", "description");
+    displayProjectDialog();
 });
 
 
@@ -10,7 +9,19 @@ function updateSide(msg, projectList){
     const ulProjectList = document.querySelector("#project-list");
     ulProjectList.innerHTML = "";
 
-    Array.from(projectList).forEach(project => {
+    createProjectContent(ulProjectList, projectList);
+}
+
+function updateContent(msg, project){
+    const content = document.querySelector("#content");
+    content.innerHTML = "";
+
+    createDescriptionContent(project);
+    createTodoContent(project);
+}
+
+function createProjectContent(parentElement, projectList){
+    projectList.forEach(project => {
         const projectListItem = document.createElement("li");
 
         projectListItem.addEventListener("click", (event) => {
@@ -27,16 +38,8 @@ function updateSide(msg, projectList){
             projectListItem.className = "selected";
 
         projectListItem.append(projectTitleElement);
-        ulProjectList.append(projectListItem);
+        parentElement.append(projectListItem);
     });
-}
-
-function updateContent(msg, project){
-    const content = document.querySelector("#content");
-    content.innerHTML = "";
-
-    createDescriptionContent(project);
-    createTodoContent(project);
 }
 
 function createDescriptionContent(project){
@@ -59,7 +62,7 @@ function createDescriptionContent(project){
     detailsNewBtn.textContent = "New Todo";
     detailsContainer.append(detailsNewBtn);
     detailsNewBtn.addEventListener("click", () => {
-        PubSub.publish("CREATE-TODO", "Todo NAME") ;
+        displayTodoDialog();
     });
 
     if(project.description != undefined && project.description.length > 0){
@@ -85,10 +88,7 @@ function createTodoContent(project){
         todoNewBtn.className = "new-button";
         todoNewBtn.textContent = "Add Item";
         todoNewBtn.addEventListener("click", () => {
-            PubSub.publish("CREATE-TODO-ITEM", {
-                todo,
-                name: "Test ITEM!"
-            });
+            displayItemDialog(todo);
         });
         todoContainer.append(todoNewBtn);
 
@@ -119,8 +119,7 @@ function createTodoContent(project){
 
             const dueDate = document.createElement("p");
             dueDate.className = "due-date";
-            dueDate.textContent = item.getDateAsString();
-            console.log(item.dueDate);
+            dueDate.textContent = item.getDateAsString() === null ? "" : `Due: ${item.getDateAsString()}`;
             rightItems.append(dueDate);
 
             const itemEditBtn = document.createElement("button");
@@ -128,6 +127,90 @@ function createTodoContent(project){
             itemEditBtn.textContent = "Edit";
             rightItems.append(itemEditBtn);
         });
+    });
+}
+
+function displayProjectDialog(){
+    const dialog = document.querySelector("#project-dialog");
+    const form = document.querySelector("#project-form");
+    const submitBtn = document.querySelector("#project-submit");
+
+    dialog.showModal();
+
+    form.addEventListener("submit", (event) => {
+        submitBtn.click();
+    });
+
+    submitBtn.addEventListener("click", () => {
+        const formData = Object.fromEntries(new FormData(form));
+        if(formData.projectName.length === 0) return;
+        
+        PubSub.publish("CREATE-PROJECT", {
+            name: formData.projectName,
+            description: formData.projectDescription
+        });
+
+        form.reset();
+        dialog.close();
+    });
+}
+
+function displayTodoDialog(){
+    const dialog = document.querySelector("#todo-dialog");
+    const form = document.querySelector("#todo-form");
+    const submitBtn = document.querySelector("#todo-submit");
+
+    dialog.showModal();
+
+    form.addEventListener("submit", (event) => {
+        submitBtn.click();
+    });
+
+    submitBtn.addEventListener("click", () => {
+        const formData = Object.fromEntries(new FormData(form));
+        if(formData.todoName.length === 0) return;
+        
+        PubSub.publish("CREATE-TODO", formData.todoName);
+
+        form.reset();
+        dialog.close();
+    });
+}
+
+function displayItemDialog(todo){
+    const dialog = document.querySelector("#item-dialog");
+    const form = document.querySelector("#item-form");
+    const submitBtn = document.querySelector("#item-submit");
+
+    dialog.showModal();
+
+    form.addEventListener("submit", (event) => {
+        submitBtn.click();
+    });
+
+    submitBtn.addEventListener("click", () => {
+        const formData = Object.fromEntries(new FormData(form));
+
+        let date = isNaN(new Date(formData.itemDate)) ? null : new Date(formData.itemDate);
+
+        const formValid = (
+            formData.itemName.length !== 0 &&
+            formData.itemPriority !== undefined
+        );
+
+        if(!formValid) return;
+
+        console.log(date);
+        
+        PubSub.publish("CREATE-TODO-ITEM", {
+            todo,
+            name: formData.itemName,
+            date,
+            priority: Number(formData.itemPriority)
+        });
+
+        form.reset();
+        dialog.close();
     });
 }
 

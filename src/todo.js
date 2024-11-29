@@ -70,6 +70,8 @@ function TodoItem(name, dueDate, priority = 0) {
     }
 
     const getDateAsString = () => {
+        if(dueDate === null) return dueDate;
+        
         return `${dueDate.getDate()} / ${dueDate.getMonth() + 1} - ${dueDate.getFullYear()}`;
     }
 
@@ -96,8 +98,10 @@ function getSelectedProject(){
 }
 
 function createProject(name, description){
-    projects.push(Project(name, description));
-    PubSub.publish("UPDATE-SIDE", projects);
+    const newProject = Project(name, description); 
+    projects.push(newProject);
+
+    PubSub.publish("PROJECT-SELECTED", newProject);
 }
 
 function setSelected(msg, selectedProject){    
@@ -116,12 +120,11 @@ PubSub.subscribe("CREATE-TODO", createTodoEventHandler);
 PubSub.subscribe("ITEM-CHECKBOX-CHANGED", itemCheckboxEventHandler);
 PubSub.subscribe("CREATE-TODO-ITEM", createTodoItemEventHandler);
 
-function createProjectEventHandler(msg, name, description){
-    createProject(name, description);
+function createProjectEventHandler(msg, data){
+    createProject(data.name, data.description);
 }
 
 function createTodoEventHandler(msg, name){
-    console.log(getSelectedProject());
     getSelectedProject().addTodo(name);
     PubSub.publish("UPDATE-CONTENT", getSelectedProject());
 }
@@ -131,10 +134,8 @@ function itemCheckboxEventHandler(msg, item){
 }
 
 function createTodoItemEventHandler(msg, data){
-    data.todo.addItem("Test Item", new Date("2015-11-28"), 1);
+    data.todo.addItem(data.name, data.date, data.priority);
     PubSub.publish("UPDATE-CONTENT", getSelectedProject());
-
-    console.log(data.todo.todoItems);
 }
  
 export { createProject };
