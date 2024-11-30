@@ -114,33 +114,6 @@ function createProject(name, description){
     PubSub.publish("SAVE");
 }
 
-function loadProjects(jsonData){
-    if(jsonData.length === 0) return;
-
-    projects = [];
-    jsonData.forEach(jsonProject => {
-        const project = Project(jsonProject.name, jsonProject.description);
-
-        jsonProject.todoList.forEach(jsonTodo => {
-            const todo = Todo(jsonTodo.name);
-
-            jsonTodo.todoItems.forEach(jsonItem => {
-                const item = TodoItem(jsonItem.name, jsonItem.dueDate, jsonData.priority);
-
-                if(jsonItem.isChecked) item.toggleChecked();
-            
-                todo.todoItems.push(item);
-            });
-
-            project.todoList.push(todo);
-        });
-
-        projects.push(project);
-    });
-
-    setSelectedProject(projects[0]);
-}
-
 function setSelectedProject(msg, selectedProject){    
     if(selectedProject === undefined)
         selectedProject = projects[0];
@@ -155,31 +128,34 @@ function setSelectedProject(msg, selectedProject){
 
 // Events
 PubSub.subscribe("PROJECT-SELECTED", setSelectedProject)
-PubSub.subscribe("CREATE-PROJECT", createProjectEventHandler);
-PubSub.subscribe("CREATE-TODO", createTodoEventHandler);
-PubSub.subscribe("ITEM-CHECKBOX-CHANGED", itemCheckboxEventHandler);
-PubSub.subscribe("CREATE-TODO-ITEM", createTodoItemEventHandler);
 
-function createProjectEventHandler(msg, data){
+PubSub.subscribe("CREATE-PROJECT", (msg, data) => {
     createProject(data.name, data.description);
-}
+});
 
-function createTodoEventHandler(msg, name){
+PubSub.subscribe("CREATE-TODO", (msg, name) => {
     getSelectedProject().addTodo(name);
     PubSub.publish("UPDATE-CONTENT", getSelectedProject());
-}
+});
 
-function itemCheckboxEventHandler(msg, item){
+PubSub.subscribe("ITEM-CHECKBOX-CHANGED", (msg, item) => {
     item.toggleChecked();
-}
+});
 
-function createTodoItemEventHandler(msg, data){
+PubSub.subscribe("CREATE-TODO-ITEM", (msg, data) => {
     data.todo.addItem(data.name, data.date, data.priority);
     PubSub.publish("UPDATE-CONTENT", getSelectedProject());
-}
+});
+
+PubSub.subscribe("LOAD-COMPLETED", (msg, loadedProjects) => {
+    projects = loadedProjects;
+    PubSub.publish("PROJECT-SELECTED", projects[0]);
+});
  
 export { 
     projects,
-    createProject, 
-    loadProjects
+    createProject,
+    Project,
+    Todo,
+    TodoItem
 };

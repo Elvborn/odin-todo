@@ -5,17 +5,5 @@ import * as Todo from "./todo.js";
 import "./uihandler.js"
 
 
+// Storage.js will load locally stored data
 PubSub.publish("LOAD");
-
-PubSub.subscribe("LOAD-COMPLETED", (msg, projects) => {
-    if(projects.length > 0){
-        Todo.loadProjects(projects);
-        return;
-    }
-
-    // Default project
-    Todo.createProject("Default Project", "This is the project description");
-    Todo.projects[0].addTodo("Todo");
-    Todo.projects[0].todoList[0].addItem("Create your own project!", null, 1);
-});
-

@@ -4,6 +4,11 @@ createProjectBtn.addEventListener("click", () => {
     displayProjectDialog();
 });
 
+const resetBtn = document.querySelector(".reset");
+resetBtn.addEventListener("click", () => {
+    PubSub.publish("RESET");
+});
+
 
 function updateSide(msg, projectList){
     const ulProjectList = document.querySelector("#project-list");
@@ -119,8 +124,6 @@ function createTodoContent(project){
 
             const rightItems = document.createElement("div");
             itemContainer.append(rightItems);
-
-            console.log(item);
 
             const dueDate = document.createElement("p");
             dueDate.className = "due-date";
