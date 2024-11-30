@@ -1,4 +1,4 @@
-const projects = [];
+let projects = [];
 
 function Project(name, description){
     const todoList = [];
@@ -6,6 +6,7 @@ function Project(name, description){
 
     const addTodo = (todoName) => {
         todoList.push(Todo(todoName));
+        PubSub.publish("SAVE");
     }
 
     const removeTodo = (todo) => {
@@ -25,6 +26,9 @@ function Project(name, description){
         get todoList(){
             return todoList;
         },
+        set todoList(value){
+            todoList = value;
+        },
         get selected(){
             return selected;
         },
@@ -41,6 +45,7 @@ function Todo(name){
 
     const addItem = (itemName, dueDate, priority) => {
         todoItems.push(TodoItem(itemName, dueDate, priority));
+        PubSub.publish("SAVE");
     }
 
     const removeItem = (todoItem) => {
@@ -57,6 +62,9 @@ function Todo(name){
         get todoItems(){
             return todoItems;
         },
+        set todoItems(value){
+            todoItems = value;
+        },
         addItem,
         removeItem
     }
@@ -67,6 +75,7 @@ function TodoItem(name, dueDate, priority = 0) {
 
     const toggleChecked = () => {
         isChecked = !isChecked;
+        PubSub.publish("SAVE");
     }
 
     const getDateAsString = () => {
@@ -102,9 +111,40 @@ function createProject(name, description){
     projects.push(newProject);
 
     PubSub.publish("PROJECT-SELECTED", newProject);
+    PubSub.publish("SAVE");
 }
 
-function setSelected(msg, selectedProject){    
+function loadProjects(jsonData){
+    if(jsonData.length === 0) return;
+
+    projects = [];
+    jsonData.forEach(jsonProject => {
+        const project = Project(jsonProject.name, jsonProject.description);
+
+        jsonProject.todoList.forEach(jsonTodo => {
+            const todo = Todo(jsonTodo.name);
+
+            jsonTodo.todoItems.forEach(jsonItem => {
+                const item = TodoItem(jsonItem.name, jsonItem.dueDate, jsonData.priority);
+
+                if(jsonItem.isChecked) item.toggleChecked();
+            
+                todo.todoItems.push(item);
+            });
+
+            project.todoList.push(todo);
+        });
+
+        projects.push(project);
+    });
+
+    setSelectedProject(projects[0]);
+}
+
+function setSelectedProject(msg, selectedProject){    
+    if(selectedProject === undefined)
+        selectedProject = projects[0];
+    
     projects.forEach(project => {
         project.selected = project === selectedProject ? true : false;
     });
@@ -114,7 +154,7 @@ function setSelected(msg, selectedProject){
 }
 
 // Events
-PubSub.subscribe("PROJECT-SELECTED", setSelected)
+PubSub.subscribe("PROJECT-SELECTED", setSelectedProject)
 PubSub.subscribe("CREATE-PROJECT", createProjectEventHandler);
 PubSub.subscribe("CREATE-TODO", createTodoEventHandler);
 PubSub.subscribe("ITEM-CHECKBOX-CHANGED", itemCheckboxEventHandler);
@@ -138,4 +178,8 @@ function createTodoItemEventHandler(msg, data){
     PubSub.publish("UPDATE-CONTENT", getSelectedProject());
 }
  
-export { createProject };
+export { 
+    projects,
+    createProject, 
+    loadProjects
+};

@@ -94,6 +94,7 @@ function createTodoContent(project){
         });
         todoContainer.append(todoNewBtn);
 
+        // Todo items
         todo.todoItems.forEach((item, i) => {
             const itemContainer = document.createElement("div");
             itemContainer.classList.add("item-container");
@@ -118,6 +119,8 @@ function createTodoContent(project){
 
             const rightItems = document.createElement("div");
             itemContainer.append(rightItems);
+
+            console.log(item);
 
             const dueDate = document.createElement("p");
             dueDate.className = "due-date";
