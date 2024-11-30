@@ -13,8 +13,8 @@
     --content-background-color: #252525;
     --new-button-color:#47C04D;
     --edit-button-color:#C08E47;
-    --priority-1-color:#C04747;
-    --priority-2-color:#C0B247;
+    --priority-1-color:#C0B247;
+    --priority-2-color:#C04747;
 }
 
 button[class*="button"]{
@@ -47,11 +47,11 @@ button[class*="button"]:hover{
 }
 
 .delete-button{
-    background-color: var(--priority-1-color);
+    background-color: var(--priority-2-color);
 }
 
 .delete-button:hover{
-    background-color: color-mix(in srgb, var(--priority-1-color) 80%, white 20%);
+    background-color: color-mix(in srgb, var(--priority-2-color) 80%, white 20%);
 }
 
 body{
@@ -343,5 +343,5 @@ form input, textarea, select{
 }
 
 input:invalid:focus {
-    outline: 1px solid var(--priority-1-color);
+    outline: 1px solid var(--priority-2-color);
 }
