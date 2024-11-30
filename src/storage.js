@@ -2,6 +2,9 @@ import {Project, Todo, TodoItem, projects} from "./todo.js";
 
 function save(){
     localStorage.projects = JSON.stringify(projects);
+
+    console.log("Saving...");
+    console.log(projects);
 }
 
 function load(){
@@ -10,7 +13,7 @@ function load(){
     
     const jsonProjectData = isDataValid ? JSON.parse(data) : [];
 
-    const projects = [];
+    const loadedProjects = [];
 
     // Default project setup
     if(jsonProjectData.length === 0){
@@ -19,7 +22,7 @@ function load(){
         const todoItem = TodoItem("Create your own project!", null, 2);
         todo.todoItems.push(todoItem);
         project.todoList.push(todo);
-        projects.push(project);
+        loadedProjects.push(project);
     }else{
         jsonProjectData.forEach(jsonProject => {
             const project = Project(jsonProject.name, jsonProject.description);
@@ -30,7 +33,7 @@ function load(){
                 jsonTodo.todoItems.forEach(jsonItem => {
                     const item = TodoItem(jsonItem.name, jsonItem.dueDate, jsonItem.priority);
     
-                    if(jsonItem.isChecked) item.toggleChecked();
+                    if(jsonItem.isChecked) item.isChecked = true;
                     if(jsonItem.dueDate) item.dueDate = new Date(jsonItem.dueDate);
                 
                     todo.todoItems.push(item);
@@ -39,11 +42,14 @@ function load(){
                 project.todoList.push(todo);
             });
     
-            projects.push(project);
+            loadedProjects.push(project);
         });   
     }
 
-    PubSub.publish("LOAD-COMPLETED", projects);
+    console.log("loading");
+    console.log(loadedProjects);
+
+    PubSub.publish("LOAD-COMPLETED", loadedProjects);
 }
 
 

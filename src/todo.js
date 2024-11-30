@@ -91,6 +91,9 @@ function TodoItem(name, dueDate, priority = 0) {
         get isChecked() {
             return isChecked;
         },
+        set isChecked(value){
+            isChecked = value;
+        },
         get priority(){
             return priority;
         },

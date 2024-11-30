@@ -136,7 +136,7 @@ function createTodoContent(project){
                     name: `checkbox_${i}`,
                 },
                 options: {
-                    checked: item.isChecked   
+                    checked: item.isChecked
                 }
             });
             itemCB.addEventListener("change", () => {
