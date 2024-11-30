@@ -97,6 +97,9 @@ function TodoItem(name, dueDate, priority = 0) {
         get dueDate(){
             return dueDate;
         },
+        set dueDate(value){
+            dueDate = value;
+        },
         getDateAsString,
         toggleChecked
     }

@@ -19,7 +19,7 @@ function load(){
     if(jsonProjectData.length === 0){
         const project = Project("Default Project", "This is the project description");
         const todo = Todo("Todo");
-        const todoItem = TodoItem("Create your own project!", null, 1);
+        const todoItem = TodoItem("Create your own project!", null, 2);
         todo.todoItems.push(todoItem);
         project.todoList.push(todo);
         projects.push(project);
@@ -34,6 +34,7 @@ function load(){
                     const item = TodoItem(jsonItem.name, jsonItem.dueDate, jsonItem.priority);
     
                     if(jsonItem.isChecked) item.toggleChecked();
+                    if(jsonItem.dueDate) item.dueDate = new Date(jsonItem.dueDate);
                 
                     todo.todoItems.push(item);
                 });
