@@ -47,92 +47,128 @@ function createProjectContent(parentElement, projectList){
 }
 
 function createDescriptionContent(project){
-    const detailsContainer = document.createElement("div");
+    const detailsContainer = createElement("div");
     detailsContainer.id = "project-details";
     content.append(detailsContainer);
 
-    const detailsTitle = document.createElement("h2");
-    detailsTitle.className = "content-title";
-    detailsTitle.textContent = project.name;
+    const detailsTitle = createElement("h2", {
+        innerText: project.name,
+        attributes: {
+            class: "content-title"
+        }
+    });
     detailsContainer.append(detailsTitle);
 
-    const detailsEditBtn = document.createElement("button");
-    detailsEditBtn.className = "edit-button";
-    detailsEditBtn.textContent = "Edit Project";
+    const detailsEditBtn = createElement("button", {
+        innerText: "Edit Project",
+        attributes: {
+            class: "edit-button"
+        }
+    });
     detailsContainer.append(detailsEditBtn);
 
-    const detailsNewBtn = document.createElement("button");
-    detailsNewBtn.className = "new-button";
-    detailsNewBtn.textContent = "New Todo";
-    detailsContainer.append(detailsNewBtn);
+    const detailsNewBtn = createElement("button", {
+        innerText: "New Todo",
+        attributes: {
+            class: "new-button"
+        }
+    });;
     detailsNewBtn.addEventListener("click", () => {
         displayTodoDialog();
     });
+    detailsContainer.append(detailsNewBtn);
 
     if(project.description != undefined && project.description.length > 0){
-        const detailsDescriptionContainer= document.createElement("div");
-        detailsDescriptionContainer.className = "item-container";
-        detailsDescriptionContainer.textContent = project.description;
+        const detailsDescriptionContainer= createElement("div", {
+            innerText: project.description,
+            attributes: {
+                class: "item-container"
+            }
+        });
         detailsContainer.append(detailsDescriptionContainer);
     }
 }
 
 function createTodoContent(project){
     project.todoList.forEach(todo => {
-        const todoContainer = document.createElement("div");
-        todoContainer.className = "todo";
+        const todoContainer = createElement("div", {
+            attributes: {
+                class: "todo"
+            }
+        });
         content.append(todoContainer);
 
-        const todoTitle = document.createElement("h2");
-        todoTitle.className = "content-title";
-        todoTitle.textContent = todo.name;
+        const todoTitle = createElement("h2", {
+            innerText: todo.name,
+            attributes: {
+                class: "content-title"
+            }
+        });
         todoContainer.append(todoTitle);
 
-        const todoNewBtn = document.createElement("button");
-        todoNewBtn.className = "new-button";
-        todoNewBtn.textContent = "Add Item";
+        const todoNewBtn = createElement("button", {
+            innerText: "Add Item",
+            attributes: {
+                class: "new-button"
+            }
+        });
         todoNewBtn.addEventListener("click", () => {
-            console.log("First:");
-            console.log(todo.name);
-
             displayItemDialog(todo);
         });
         todoContainer.append(todoNewBtn);
 
         // Todo items
         todo.todoItems.forEach((item, i) => {
-            const itemContainer = document.createElement("div");
-            itemContainer.classList.add("item-container");
+            const itemContainer = createElement("div", {
+                attributes: {
+                    class: "item-container"
+                }
+            });
+
             if(item.priority != undefined && item.priority > 0)
                 itemContainer.classList.add(`priority${item.priority}`);
             todoContainer.append(itemContainer);
             
-            const itemCB = document.createElement("input");
-            itemCB.type = "checkbox";
-            itemCB.id = `checkbox_${i}`;
-            itemCB.name = `checkbox_${i}`;
-            itemCB.checked = item.isChecked;
+            const itemCB = createElement("input", {
+                attributes:{
+                    type: "checkbox",
+                    id: `checkbox_${i}`,
+                    name: `checkbox_${i}`,
+                },
+                options: {
+                    checked: item.isChecked   
+                }
+            });
             itemCB.addEventListener("change", () => {
                 PubSub.publish("ITEM-CHECKBOX-CHANGED", item);
             });
             itemContainer.append(itemCB);
 
-            const itemName = document.createElement("label");
-            itemName.textContent = item.name;
-            itemName.setAttribute("for", `checkbox_${i}`);
+            const itemName = createElement("label", {
+                innerText: item.name,
+                attributes:{
+                    for: `checkbox_${i}`
+                }
+            });
             itemContainer.append(itemName);
 
-            const rightItems = document.createElement("div");
+            const rightItems = createElement("div");
             itemContainer.append(rightItems);
 
-            const dueDate = document.createElement("p");
-            dueDate.className = "due-date";
-            dueDate.textContent = item.getDateAsString() === null ? "" : item.getDateAsString();
+            const dueDate = createElement("p", {
+                innerText: item.getDateAsString() === null ? "" : item.getDateAsString(),
+                attributes: {
+                    class: "due-date"
+                }
+            });
             rightItems.append(dueDate);
 
-            const itemEditBtn = document.createElement("button");
-            itemEditBtn.className = "edit-button";
-            itemEditBtn.textContent = "Edit";
+            const itemEditBtn = createElement("button", {
+                innerText: "Edit",
+                attributes: {
+                    class: "edit-button"
+                }
+            });
             rightItems.append(itemEditBtn);
         });
     });
@@ -142,63 +178,88 @@ function displayProjectDialog(){
     const dialog = document.querySelector("#project-dialog");
     dialog.innerHTML = "";
 
-    const form = document.createElement("form");
-    form.id = "project-form";
-    form.method = "dialog"
+    const form = createElement("form", {
+        attributes: {
+            id: "project-form",
+            method: "dialog"
+        }
+    });
     dialog.append(form);
 
-    const legend = document.createElement("legend");
-    legend.textContent = "Create Project";
+    const legend = createElement("label", {
+        innerText: "Create Project"
+    });
     form.append(legend);
 
     // Name
-    const nameContainer = document.createElement("div");
+    const nameContainer = createElement("div");
     form.append(nameContainer);
 
-    const nameLabel = document.createElement("label");
-    nameLabel.setAttribute("for", "project-name");
-    nameLabel.textContent = "Project Name";
+    const nameLabel = createElement("label", {
+        innerText: "Project Name",
+        attributes: {
+            for: "project-name"
+        }
+    });
     nameContainer.append(nameLabel);
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.name = "projectName";
-    nameInput.id = "project-name";
-    nameInput.placeholder = "Required";
-    nameInput.required = true;
+    const nameInput = createElement("input", {
+        attributes: {
+            type: "text",
+            name: "projectName",
+            id: "project-name",
+            placeholder: "Required",
+            required: true
+        }
+    });
     nameContainer.append(nameInput); 
 
     // Description
-    const descriptionContainer = document.createElement("div");
+    const descriptionContainer = createElement("div");
     form.append(descriptionContainer);
 
-    const descriptionLabel = document.createElement("label");
-    descriptionLabel.setAttribute("for", "project-description");
-    descriptionLabel.textContent = "Description";
+    const descriptionLabel = createElement("label", {
+        innerText: "Description",
+        attributes: {
+            for: "project-description"
+        }
+    });
     descriptionContainer.append(descriptionLabel);
 
-    const descriptionInput = document.createElement("textarea");
-    descriptionInput.name = "projectDescription";
-    descriptionInput.id = "project-description";
-    descriptionInput.rows = 3;
+    const descriptionInput = createElement("input", {
+        attributes: {
+            name: "projectDescription",
+            id: "project-description",
+            rows: 3
+        }
+    });
     descriptionContainer.append(descriptionInput); 
 
     // Buttons
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "buttons";
+    const buttonContainer = createElement("div", {
+        attributes: {
+            class: "buttons"
+        }
+    });
     form.append(buttonContainer);
 
-    const returnBtn = document.createElement("button");
-    returnBtn.className = "delete-button";
-    returnBtn.formNoValidate = true;
-    returnBtn.textContent = "Cancel";
+    const returnBtn = createElement("button", {
+        innerText: "Cancel",
+        attributes: {
+            class: "delete-button",
+            formNoValidate: true,
+        }
+    });
     buttonContainer.append(returnBtn);
 
-    const submitBtn = document.createElement("button");
-    submitBtn.id = "item-submit";
-    submitBtn.className = "new-button";
-    submitBtn.type = "submit";
-    submitBtn.textContent = "Create";
+    const submitBtn = createElement("button", {
+        innerText: "Create",
+        attributes: {
+            id: "item-submit",
+            class: "new-button",
+            type: "submit"
+        }
+    });
     buttonContainer.append(submitBtn);
 
     // Event listeners
@@ -226,48 +287,67 @@ function displayTodoDialog(){
     const dialog = document.querySelector("#todo-dialog");
     dialog.innerHTML = "";
 
-    const form = document.createElement("form");
-    form.id = "todo-form";
-    form.method = "dialog"
+    const form = createElement("form", {
+        attributes: {
+            id: "todo-form",
+            method: "dialog"
+        }
+    });
     dialog.append(form);
 
-    const legend = document.createElement("legend");
-    legend.textContent = "Create Todo";
+    const legend = createElement("legend", {
+        innerText: "Create Todo"
+    });
     form.append(legend);
 
     // Name
-    const nameContainer = document.createElement("div");
+    const nameContainer = createElement("div");
     form.append(nameContainer);
 
-    const nameLabel = document.createElement("label");
-    nameLabel.setAttribute("for", "todo-name");
-    nameLabel.textContent = "Todo Name";
+    const nameLabel = createElement("label", {
+        innerText: "Todo Name",
+        attributes:{
+            for: "todo-name"
+        }
+    });
     nameContainer.append(nameLabel);
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.name = "todoName";
-    nameInput.id = "todo-name";
-    nameInput.placeholder = "Required";
-    nameInput.required = true;
+    const nameInput = createElement("input", {
+        attributes:{
+            type: "text",
+            name: "todoName",
+            id: "todo-name",
+            placeholder: "Required",
+            required: true
+        }
+    });
     nameContainer.append(nameInput); 
 
     // Buttons
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "buttons";
+    const buttonContainer = createElement("div", {
+        attributes: {
+            class: "buttons"
+        }
+    });
     form.append(buttonContainer);
 
-    const returnBtn = document.createElement("button");
-    returnBtn.className = "delete-button";
-    returnBtn.formNoValidate = true;
-    returnBtn.textContent = "Cancel";
+    const returnBtn = createElement("button", {
+        innerText: "Cancel",
+        attributes: {
+            class: "delete-button",
+            formNoValidate: true
+        }
+    });
     buttonContainer.append(returnBtn);
 
-    const submitBtn = document.createElement("button");
-    submitBtn.id = "item-submit";
-    submitBtn.className = "new-button";
-    submitBtn.type = "submit";
-    submitBtn.textContent = "Create";
+    const submitBtn = createElement("button", {
+        innerText: "Create",
+        attributes: {
+            id: "item-submit",
+            class: "new-button",
+            type: "submit",
+        }
+    });
     buttonContainer.append(submitBtn);
 
     // Event listeners
@@ -292,69 +372,102 @@ function displayItemDialog(todo){
     const dialog = document.querySelector("#item-dialog");
     dialog.innerHTML = "";
 
-    const form = document.createElement("form");
-    form.method = "dialog";
-    form.id = "item-form";
+    const form = createElement("form", {
+        attributes: {
+            method: "dialog",
+            id: "item-form"
+        }
+    });
     dialog.append(form);
 
-    const legend = document.createElement("legend");
-    legend.textContent = "Create Todo Item";
+    const legend = createElement("legend", {
+        innerText: "Create Todo Item"
+    });
     form.append(legend);
 
     // Name
-    const nameContainer = document.createElement("div");
+    const nameContainer = createElement("div");
     form.append(nameContainer);
 
-    const nameLabel = document.createElement("label");
-    nameLabel.setAttribute("for", "item-name");
-    nameLabel.textContent = "Item Name";
+    nameLabel = createElement("label", {
+        innerText: "Item Name",
+        attributes: {
+            for: "item-name"
+        }
+    });
     nameContainer.append(nameLabel);
 
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.name = "itemName";
-    nameInput.id = "item-name";
-    nameInput.placeholder = "Required";
-    nameInput.required = true;
+    const nameInput = createElement("input", {
+        attributes: {
+            type: "text",
+            name: "itemName",
+            id: "item-name",
+            placeholder: "Required",
+            required: true
+        }
+    });
     nameContainer.append(nameInput);
 
     // Due date
-    const dateContainer = document.createElement("div");
+    const dateContainer = createElement("div");
     form.append(dateContainer);
 
-    const dateLabel = document.createElement("label");
-    dateLabel.setAttribute("for", "item-date");
-    dateLabel.textContent = "Due date";
+    const dateLabel = createElement("label", {
+        innerText: "Due Date",
+        attributes: {
+            for: "item-date"
+        }
+    });
     dateContainer.append(dateLabel);
 
-    const dateInput = document.createElement("input");
-    dateInput.type = "date";
-    dateInput.name = "itemDate";
-    dateInput.id = "item-date";
+    const dateInput = createElement("input", {
+        attributes: {
+            type: "date",
+            name: "itemDate",
+            id: "item-date"
+        }
+    });
     dateContainer.append(dateInput);
 
     // Selector
-    const priorityContainer = document.createElement("div");
+    const priorityContainer = createElement("div");
     form.append(priorityContainer);
 
-    const priorityLabel = document.createElement("label");
-    priorityLabel.setAttribute("for", "item-priority");
-    priorityLabel.textContent = "Priority";
+    const priorityLabel = createElement("label", {
+        innerText: "Priority",
+        attributes: {
+            for: "item-priority"
+        }
+    });
     priorityContainer.append(priorityLabel);
 
-    const select = document.createElement("select");
-    select.name = "itemPriority";
-    select.id = "item-priority";
+    const select = createElement("select", {
+        attributes: {
+            name: "itemPriority",
+            id: "item-priority"
+        }
+    });
 
-    const option1 = document.createElement("option");
-    option1.value = "0";
-    option1.textContent = "Default";
-    const option2 = document.createElement("option");
-    option2.value = "1";
-    option2.textContent = "Important";
-    const option3 = document.createElement("option");
-    option3.value = "2";
-    option3.textContent = "Urgent";
+    const option1 = createElement("option", {
+        innerText: "Default",
+        attributes:{
+            value: 0
+        }
+    });
+
+    const option2 = createElement("option", {
+        innerText: "Important",
+        attributes:{
+            value: 1
+        }
+    });
+
+    const option3 = createElement("option", {
+        innerText: "Urgent",
+        attributes:{
+            value: 2
+        }
+    });
 
     select.options.add(option1);
     select.options.add(option2);
@@ -362,21 +475,30 @@ function displayItemDialog(todo){
     priorityContainer.append(select);
 
     // Buttons
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "buttons";
+    const buttonContainer = createElement("div", {
+        attributes: {
+            class: "buttons"
+        }
+    });
     form.append(buttonContainer);
 
-    const returnBtn = document.createElement("button");
-    returnBtn.className = "delete-button";
-    returnBtn.formNoValidate = true;
-    returnBtn.textContent = "Cancel";
+    const returnBtn = createElement("button", {
+        innerText: "Cancel",
+        attributes: {
+            class: "delete-button",
+            formNoValidate: true,
+        }
+    });
     buttonContainer.append(returnBtn);
 
-    const submitBtn = document.createElement("button");
-    submitBtn.id = "item-submit";
-    submitBtn.className = "new-button";
-    submitBtn.type = "submit";
-    submitBtn.textContent = "Create";
+    const submitBtn = createElement("button", {
+        innerText: "Create",
+        attributes: {
+            id: "item-submit",
+            class: "new-button",
+            type: "submit"
+        }
+    });
     buttonContainer.append(submitBtn);
 
     // Event listeners
@@ -408,6 +530,27 @@ function displayItemDialog(todo){
     });
 
     dialog.showModal();
+}
+
+function createElement(type, elementData = {}){
+    element = document.createElement(type);
+    
+    if(elementData.hasOwnProperty("innerText"))
+        element.textContent = elementData.innerText;
+
+    if(elementData.hasOwnProperty("attributes")){
+        for(const [key, value] of Object.entries(elementData.attributes)){
+            element.setAttribute(key, value);
+        }
+    }
+
+    if(elementData.hasOwnProperty("options")){
+        for(const [key, value] of Object.entries(elementData.options)){
+            element[key] = value;
+        }
+    }
+
+    return element;
 }
 
 // Events
