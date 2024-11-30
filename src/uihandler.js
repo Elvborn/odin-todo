@@ -28,7 +28,6 @@ function createProjectContent(parentElement, projectList){
             if(event.target.className === "selected") return;
 
             PubSub.publish("PROJECT-SELECTED", project);
-            console.log(`Project selected: ${project.name}`);
         });
 
         const projectTitleElement = document.createElement("h3");
@@ -88,6 +87,9 @@ function createTodoContent(project){
         todoNewBtn.className = "new-button";
         todoNewBtn.textContent = "Add Item";
         todoNewBtn.addEventListener("click", () => {
+            console.log("First:");
+            console.log(todo.name);
+
             displayItemDialog(todo);
         });
         todoContainer.append(todoNewBtn);
@@ -119,7 +121,7 @@ function createTodoContent(project){
 
             const dueDate = document.createElement("p");
             dueDate.className = "due-date";
-            dueDate.textContent = item.getDateAsString() === null ? "" : `Due: ${item.getDateAsString()}`;
+            dueDate.textContent = item.getDateAsString() === null ? "" : item.getDateAsString();
             rightItems.append(dueDate);
 
             const itemEditBtn = document.createElement("button");
@@ -132,11 +134,68 @@ function createTodoContent(project){
 
 function displayProjectDialog(){
     const dialog = document.querySelector("#project-dialog");
-    const form = document.querySelector("#project-form");
-    const submitBtn = document.querySelector("#project-submit");
+    dialog.innerHTML = "";
 
-    dialog.showModal();
+    const form = document.createElement("form");
+    form.id = "project-form";
+    form.method = "dialog"
+    dialog.append(form);
 
+    const legend = document.createElement("legend");
+    legend.textContent = "Create Project";
+    form.append(legend);
+
+    // Name
+    const nameContainer = document.createElement("div");
+    form.append(nameContainer);
+
+    const nameLabel = document.createElement("label");
+    nameLabel.setAttribute("for", "project-name");
+    nameLabel.textContent = "Project Name";
+    nameContainer.append(nameLabel);
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.name = "projectName";
+    nameInput.id = "project-name";
+    nameInput.placeholder = "Required";
+    nameInput.required = true;
+    nameContainer.append(nameInput); 
+
+    // Description
+    const descriptionContainer = document.createElement("div");
+    form.append(descriptionContainer);
+
+    const descriptionLabel = document.createElement("label");
+    descriptionLabel.setAttribute("for", "project-description");
+    descriptionLabel.textContent = "Description";
+    descriptionContainer.append(descriptionLabel);
+
+    const descriptionInput = document.createElement("textarea");
+    descriptionInput.name = "projectDescription";
+    descriptionInput.id = "project-description";
+    descriptionInput.rows = 3;
+    descriptionContainer.append(descriptionInput); 
+
+    // Buttons
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttons";
+    form.append(buttonContainer);
+
+    const returnBtn = document.createElement("button");
+    returnBtn.className = "delete-button";
+    returnBtn.formNoValidate = true;
+    returnBtn.textContent = "Cancel";
+    buttonContainer.append(returnBtn);
+
+    const submitBtn = document.createElement("button");
+    submitBtn.id = "item-submit";
+    submitBtn.className = "new-button";
+    submitBtn.type = "submit";
+    submitBtn.textContent = "Create";
+    buttonContainer.append(submitBtn);
+
+    // Event listeners
     form.addEventListener("submit", (event) => {
         submitBtn.click();
     });
@@ -153,15 +212,59 @@ function displayProjectDialog(){
         form.reset();
         dialog.close();
     });
+
+    dialog.showModal();
 }
 
 function displayTodoDialog(){
     const dialog = document.querySelector("#todo-dialog");
-    const form = document.querySelector("#todo-form");
-    const submitBtn = document.querySelector("#todo-submit");
+    dialog.innerHTML = "";
 
-    dialog.showModal();
+    const form = document.createElement("form");
+    form.id = "todo-form";
+    form.method = "dialog"
+    dialog.append(form);
 
+    const legend = document.createElement("legend");
+    legend.textContent = "Create Todo";
+    form.append(legend);
+
+    // Name
+    const nameContainer = document.createElement("div");
+    form.append(nameContainer);
+
+    const nameLabel = document.createElement("label");
+    nameLabel.setAttribute("for", "todo-name");
+    nameLabel.textContent = "Todo Name";
+    nameContainer.append(nameLabel);
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.name = "todoName";
+    nameInput.id = "todo-name";
+    nameInput.placeholder = "Required";
+    nameInput.required = true;
+    nameContainer.append(nameInput); 
+
+    // Buttons
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttons";
+    form.append(buttonContainer);
+
+    const returnBtn = document.createElement("button");
+    returnBtn.className = "delete-button";
+    returnBtn.formNoValidate = true;
+    returnBtn.textContent = "Cancel";
+    buttonContainer.append(returnBtn);
+
+    const submitBtn = document.createElement("button");
+    submitBtn.id = "item-submit";
+    submitBtn.className = "new-button";
+    submitBtn.type = "submit";
+    submitBtn.textContent = "Create";
+    buttonContainer.append(submitBtn);
+
+    // Event listeners
     form.addEventListener("submit", (event) => {
         submitBtn.click();
     });
@@ -175,15 +278,102 @@ function displayTodoDialog(){
         form.reset();
         dialog.close();
     });
+
+    dialog.showModal();
 }
 
 function displayItemDialog(todo){
     const dialog = document.querySelector("#item-dialog");
-    const form = document.querySelector("#item-form");
-    const submitBtn = document.querySelector("#item-submit");
+    dialog.innerHTML = "";
 
-    dialog.showModal();
+    const form = document.createElement("form");
+    form.method = "dialog";
+    form.id = "item-form";
+    dialog.append(form);
 
+    const legend = document.createElement("legend");
+    legend.textContent = "Create Todo Item";
+    form.append(legend);
+
+    // Name
+    const nameContainer = document.createElement("div");
+    form.append(nameContainer);
+
+    const nameLabel = document.createElement("label");
+    nameLabel.setAttribute("for", "item-name");
+    nameLabel.textContent = "Item Name";
+    nameContainer.append(nameLabel);
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.name = "itemName";
+    nameInput.id = "item-name";
+    nameInput.placeholder = "Required";
+    nameInput.required = true;
+    nameContainer.append(nameInput);
+
+    // Due date
+    const dateContainer = document.createElement("div");
+    form.append(dateContainer);
+
+    const dateLabel = document.createElement("label");
+    dateLabel.setAttribute("for", "item-date");
+    dateLabel.textContent = "Due date";
+    dateContainer.append(dateLabel);
+
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.name = "itemDate";
+    dateInput.id = "item-date";
+    dateContainer.append(dateInput);
+
+    // Selector
+    const priorityContainer = document.createElement("div");
+    form.append(priorityContainer);
+
+    const priorityLabel = document.createElement("label");
+    priorityLabel.setAttribute("for", "item-priority");
+    priorityLabel.textContent = "Priority";
+    priorityContainer.append(priorityLabel);
+
+    const select = document.createElement("select");
+    select.name = "itemPriority";
+    select.id = "item-priority";
+
+    const option1 = document.createElement("option");
+    option1.value = "0";
+    option1.textContent = "Default";
+    const option2 = document.createElement("option");
+    option2.value = "1";
+    option2.textContent = "Important";
+    const option3 = document.createElement("option");
+    option3.value = "2";
+    option3.textContent = "Urgent";
+
+    select.options.add(option1);
+    select.options.add(option2);
+    select.options.add(option3);
+    priorityContainer.append(select);
+
+    // Buttons
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "buttons";
+    form.append(buttonContainer);
+
+    const returnBtn = document.createElement("button");
+    returnBtn.className = "delete-button";
+    returnBtn.formNoValidate = true;
+    returnBtn.textContent = "Cancel";
+    buttonContainer.append(returnBtn);
+
+    const submitBtn = document.createElement("button");
+    submitBtn.id = "item-submit";
+    submitBtn.className = "new-button";
+    submitBtn.type = "submit";
+    submitBtn.textContent = "Create";
+    buttonContainer.append(submitBtn);
+
+    // Event listeners
     form.addEventListener("submit", (event) => {
         submitBtn.click();
     });
@@ -199,8 +389,6 @@ function displayItemDialog(todo){
         );
 
         if(!formValid) return;
-
-        console.log(date);
         
         PubSub.publish("CREATE-TODO-ITEM", {
             todo,
@@ -212,6 +400,8 @@ function displayItemDialog(todo){
         form.reset();
         dialog.close();
     });
+
+    dialog.showModal();
 }
 
 // Events
