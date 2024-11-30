@@ -2,9 +2,6 @@ import {Project, Todo, TodoItem, projects} from "./todo.js";
 
 function save(){
     localStorage.projects = JSON.stringify(projects);
-
-    console.log("Saved!");
-    console.log(projects);
 }
 
 function load(){
@@ -46,7 +43,6 @@ function load(){
         });   
     }
 
-    console.log(projects);
     PubSub.publish("LOAD-COMPLETED", projects);
 }
 
