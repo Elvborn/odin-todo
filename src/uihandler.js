@@ -24,7 +24,7 @@ function updateContent(msg, project){
     content.innerHTML = "";
 
     if(project === undefined) return;
-    
+
     createDescriptionContent(project);
     createTodoContent(project);
 }
@@ -497,7 +497,7 @@ function displayItemDialog(todo, item = null){
     const nameContainer = createElement("div");
     form.append(nameContainer);
 
-    nameLabel = createElement("label", {
+    const nameLabel = createElement("label", {
         innerText: "Item Name",
         attributes: {
             for: "item-name"
