@@ -2,9 +2,6 @@ import {Project, Todo, TodoItem, projects} from "./todo.js";
 
 function save(){
     localStorage.projects = JSON.stringify(projects);
-
-    console.log("Saving...");
-    console.log(projects);
 }
 
 function load(){
@@ -31,10 +28,11 @@ function load(){
                 const todo = Todo(jsonTodo.name);
     
                 jsonTodo.todoItems.forEach(jsonItem => {
-                    const item = TodoItem(jsonItem.name, jsonItem.dueDate, jsonItem.priority);
+                    const date = jsonItem.dueDate ? new Date(jsonItem.dueDate) : null;
+
+                    const item = TodoItem(jsonItem.name, date, jsonItem.priority);
     
                     if(jsonItem.isChecked) item.isChecked = true;
-                    if(jsonItem.dueDate) item.dueDate = new Date(jsonItem.dueDate);
                 
                     todo.todoItems.push(item);
                 });
@@ -45,9 +43,6 @@ function load(){
             loadedProjects.push(project);
         });   
     }
-
-    console.log("loading");
-    console.log(loadedProjects);
 
     PubSub.publish("LOAD-COMPLETED", loadedProjects);
 }

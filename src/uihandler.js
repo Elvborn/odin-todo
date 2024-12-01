@@ -154,7 +154,7 @@ function createTodoContent(project){
 
             const rightItems = createElement("div");
             itemContainer.append(rightItems);
-
+            
             const dueDate = createElement("p", {
                 innerText: item.getDateAsString() === null ? "" : item.getDateAsString(),
                 attributes: {
@@ -168,6 +168,9 @@ function createTodoContent(project){
                 attributes: {
                     class: "edit-button"
                 }
+            });
+            itemEditBtn.addEventListener("click", () => {
+                displayItemDialog(todo, item);
             });
             rightItems.append(itemEditBtn);
         });
@@ -368,7 +371,7 @@ function displayTodoDialog(){
     dialog.showModal();
 }
 
-function displayItemDialog(todo){
+function displayItemDialog(todo, item = null){
     const dialog = document.querySelector("#item-dialog");
     dialog.innerHTML = "";
 
@@ -378,6 +381,14 @@ function displayItemDialog(todo){
             id: "item-form"
         }
     });
+
+    form.addEventListener("keypress", (event) => {        
+        if(event.key === "Enter"){
+            event.preventDefault();
+            submitBtn.click();
+        }
+    });
+
     dialog.append(form);
 
     const legend = createElement("legend", {
@@ -403,7 +414,8 @@ function displayItemDialog(todo){
             name: "itemName",
             id: "item-name",
             placeholder: "Required",
-            required: true
+            required: true,
+            value: item === null ? "" : item.name,
         }
     });
     nameContainer.append(nameInput);
@@ -424,7 +436,8 @@ function displayItemDialog(todo){
         attributes: {
             type: "date",
             name: "itemDate",
-            id: "item-date"
+            id: "item-date",
+            value: item === null ? "" : item.getDateAsInputFormat()
         }
     });
     dateContainer.append(dateInput);
@@ -444,7 +457,8 @@ function displayItemDialog(todo){
     const select = createElement("select", {
         attributes: {
             name: "itemPriority",
-            id: "item-priority"
+            id: "item-priority",
+            
         }
     });
 
@@ -472,6 +486,9 @@ function displayItemDialog(todo){
     select.options.add(option1);
     select.options.add(option2);
     select.options.add(option3);
+
+    select.value = item === null ? 0 : item.priority;
+
     priorityContainer.append(select);
 
     // Buttons
@@ -486,24 +503,51 @@ function displayItemDialog(todo){
         innerText: "Cancel",
         attributes: {
             class: "delete-button",
-            formNoValidate: true,
+        },
+        options: {
+            formNoValidate: true
         }
     });
+
+    returnBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        dialog.close();
+    });
+
+
     buttonContainer.append(returnBtn);
 
+    if(item !== null){
+        const deleteBtn = createElement("button", {
+            innerText: "Delete",
+            attributes: {
+                id: "item-delete",
+                class: "delete-button"
+            },
+            options: {
+                formNoValidate: true
+            }
+        });
+
+        deleteBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            PubSub.publish("DELETE-TODO-ITEM", {
+                todo,
+                item
+            });
+            dialog.close();
+        });
+
+        buttonContainer.append(deleteBtn); 
+    }
+
     const submitBtn = createElement("button", {
-        innerText: "Create",
+        innerText: item === null ? "Create" : "Save",
         attributes: {
             id: "item-submit",
             class: "new-button",
             type: "submit"
         }
-    });
-    buttonContainer.append(submitBtn);
-
-    // Event listeners
-    form.addEventListener("submit", (event) => {
-        submitBtn.click();
     });
 
     submitBtn.addEventListener("click", () => {
@@ -517,9 +561,11 @@ function displayItemDialog(todo){
         );
 
         if(!formValid) return;
-        
-        PubSub.publish("CREATE-TODO-ITEM", {
+
+        const eventMsg = item === null ? "CREATE-TODO-ITEM" : "UPDATE-TODO-ITEM";
+        PubSub.publish(eventMsg, {
             todo,
+            item,
             name: formData.itemName,
             date,
             priority: Number(formData.itemPriority)
@@ -528,6 +574,8 @@ function displayItemDialog(todo){
         form.reset();
         dialog.close();
     });
+
+    buttonContainer.append(submitBtn);
 
     dialog.showModal();
 }

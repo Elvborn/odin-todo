@@ -6,14 +6,19 @@ function Project(name, description){
 
     const addTodo = (todoName) => {
         todoList.push(Todo(todoName));
+
         PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
     }
 
     const removeTodo = (todo) => {
         if(!todoList.includes(todo)) return;
 
         const index = todoList.indexOf(todo);
-        todoList.splice(index, 0);
+        todoList.splice(index, 1);
+
+        PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
     }
 
     return {
@@ -45,14 +50,19 @@ function Todo(name){
 
     const addItem = (itemName, dueDate, priority) => {
         todoItems.push(TodoItem(itemName, dueDate, priority));
+
         PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
     }
 
     const removeItem = (todoItem) => {
         if(!todoItems.includes(todoItem)) return;
 
         const index = todoItems.indexOf(todoItem);
-        todoItems.splice(index, 0);
+        todoItems.splice(index, 1);
+
+        PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
     }
 
     return {
@@ -78,10 +88,27 @@ function TodoItem(name, dueDate, priority = 0) {
         PubSub.publish("SAVE");
     }
 
+    const update = (newName, newDate, newPriority) => {
+        name = newName;
+        dueDate = newDate;
+        priority = newPriority;
+
+        PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
+    }
+
     const getDateAsString = () => {
         if(dueDate === null) return dueDate;
         
         return `${dueDate.getDate()} / ${dueDate.getMonth() + 1} - ${dueDate.getFullYear()}`;
+    }
+
+    const getDateAsInputFormat = () => {
+        if(dueDate === null) return dueDate;
+
+        const day = ("0" + dueDate.getDate()).slice(-2);
+        const month = ("0" + (dueDate.getMonth() + 1)).slice(-2);
+        return dueDate.getFullYear()+"-"+(month)+"-"+(day);
     }
 
     return {
@@ -100,10 +127,9 @@ function TodoItem(name, dueDate, priority = 0) {
         get dueDate(){
             return dueDate;
         },
-        set dueDate(value){
-            dueDate = value;
-        },
+        update,
         getDateAsString,
+        getDateAsInputFormat,
         toggleChecked
     }
 }
@@ -141,7 +167,6 @@ PubSub.subscribe("CREATE-PROJECT", (msg, data) => {
 
 PubSub.subscribe("CREATE-TODO", (msg, name) => {
     getSelectedProject().addTodo(name);
-    PubSub.publish("UPDATE-CONTENT", getSelectedProject());
 });
 
 PubSub.subscribe("ITEM-CHECKBOX-CHANGED", (msg, item) => {
@@ -150,7 +175,14 @@ PubSub.subscribe("ITEM-CHECKBOX-CHANGED", (msg, item) => {
 
 PubSub.subscribe("CREATE-TODO-ITEM", (msg, data) => {
     data.todo.addItem(data.name, data.date, data.priority);
-    PubSub.publish("UPDATE-CONTENT", getSelectedProject());
+});
+
+PubSub.subscribe("UPDATE-TODO-ITEM", (msg, data) => {
+    data.item.update(data.name, data.date, data.priority);
+});
+
+PubSub.subscribe("DELETE-TODO-ITEM", (msg, data) => {
+    data.todo.removeItem(data.item);
 });
 
 PubSub.subscribe("LOAD-COMPLETED", (msg, loadedProjects) => {
