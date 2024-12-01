@@ -1,3 +1,5 @@
+import { Todo } from "./todo";
+
 // DOM Elements
 const createProjectBtn = document.querySelector(".create-project");
 createProjectBtn.addEventListener("click", () => {
@@ -21,6 +23,8 @@ function updateContent(msg, project){
     const content = document.querySelector("#content");
     content.innerHTML = "";
 
+    if(project === undefined) return;
+    
     createDescriptionContent(project);
     createTodoContent(project);
 }
@@ -65,6 +69,11 @@ function createDescriptionContent(project){
             class: "edit-button"
         }
     });
+
+    detailsEditBtn.addEventListener("click", () => {
+        displayProjectDialog(project);
+    });
+
     detailsContainer.append(detailsEditBtn);
 
     const detailsNewBtn = createElement("button", {
@@ -72,10 +81,12 @@ function createDescriptionContent(project){
         attributes: {
             class: "new-button"
         }
-    });;
+    });
+
     detailsNewBtn.addEventListener("click", () => {
         displayTodoDialog();
     });
+
     detailsContainer.append(detailsNewBtn);
 
     if(project.description != undefined && project.description.length > 0){
@@ -106,15 +117,30 @@ function createTodoContent(project){
         });
         todoContainer.append(todoTitle);
 
+        const todoEditBtn = createElement("button", {
+            innerText: "Edit Todo",
+            attributes: {
+                class: "edit-button"
+            }
+        });
+
+        todoEditBtn.addEventListener("click", () => {
+            displayTodoDialog(todo);
+        });
+        
+        todoContainer.append(todoEditBtn);
+
         const todoNewBtn = createElement("button", {
             innerText: "Add Item",
             attributes: {
                 class: "new-button"
             }
         });
+
         todoNewBtn.addEventListener("click", () => {
             displayItemDialog(todo);
         });
+
         todoContainer.append(todoNewBtn);
 
         // Todo items
@@ -177,7 +203,7 @@ function createTodoContent(project){
     });
 }
 
-function displayProjectDialog(){
+function displayProjectDialog(project = null){
     const dialog = document.querySelector("#project-dialog");
     dialog.innerHTML = "";
 
@@ -187,6 +213,14 @@ function displayProjectDialog(){
             method: "dialog"
         }
     });
+
+    form.addEventListener("keypress", (event) => {        
+        if(event.key === "Enter"){
+            event.preventDefault();
+            submitBtn.click();
+        }
+    });
+
     dialog.append(form);
 
     const legend = createElement("label", {
@@ -212,7 +246,8 @@ function displayProjectDialog(){
             name: "projectName",
             id: "project-name",
             placeholder: "Required",
-            required: true
+            required: true,
+            value: project === null ? "" : project.name
         }
     });
     nameContainer.append(nameInput); 
@@ -233,7 +268,8 @@ function displayProjectDialog(){
         attributes: {
             name: "projectDescription",
             id: "project-description",
-            rows: 3
+            rows: 3,
+            value: project === null ? "" : project.description
         }
     });
     descriptionContainer.append(descriptionInput); 
@@ -255,26 +291,47 @@ function displayProjectDialog(){
     });
     buttonContainer.append(returnBtn);
 
+    if(project !== null){
+        const deleteBtn = createElement("button", {
+            innerText: "Delete",
+            attributes: {
+                id: "project-delete",
+                class: "delete-button"
+            },
+            options: {
+                formNoValidate: true
+            }
+        });
+
+        deleteBtn.addEventListener("click", (event) => {
+            console.log("Test");
+
+            event.preventDefault();
+            PubSub.publish("DELETE-PROJECT", {
+                project
+            });
+            dialog.close();
+        });
+
+        buttonContainer.append(deleteBtn); 
+    }
+
     const submitBtn = createElement("button", {
-        innerText: "Create",
+        innerText: project === null ? "Create" : "Save",
         attributes: {
             id: "item-submit",
             class: "new-button",
             type: "submit"
         }
     });
-    buttonContainer.append(submitBtn);
-
-    // Event listeners
-    form.addEventListener("submit", (event) => {
-        submitBtn.click();
-    });
 
     submitBtn.addEventListener("click", () => {
         const formData = Object.fromEntries(new FormData(form));
         if(formData.projectName.length === 0) return;
         
-        PubSub.publish("CREATE-PROJECT", {
+        const eventMsg = project === null ? "CREATE-PROJECT" : "UPDATE-PROJECT";
+        PubSub.publish(eventMsg, {
+            project,
             name: formData.projectName,
             description: formData.projectDescription
         });
@@ -283,10 +340,12 @@ function displayProjectDialog(){
         dialog.close();
     });
 
+    buttonContainer.append(submitBtn);
+
     dialog.showModal();
 }
 
-function displayTodoDialog(){
+function displayTodoDialog(todo = null){
     const dialog = document.querySelector("#todo-dialog");
     dialog.innerHTML = "";
 
@@ -296,6 +355,14 @@ function displayTodoDialog(){
             method: "dialog"
         }
     });
+
+    form.addEventListener("keypress", (event) => {        
+        if(event.key === "Enter"){
+            event.preventDefault();
+            submitBtn.click();
+        }
+    });
+
     dialog.append(form);
 
     const legend = createElement("legend", {
@@ -321,7 +388,8 @@ function displayTodoDialog(){
             name: "todoName",
             id: "todo-name",
             placeholder: "Required",
-            required: true
+            required: true,
+            value: todo === null ? "" : todo.name
         }
     });
     nameContainer.append(nameInput); 
@@ -341,32 +409,61 @@ function displayTodoDialog(){
             formNoValidate: true
         }
     });
+
+    returnBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        dialog.close();
+    });
+
     buttonContainer.append(returnBtn);
 
+    if(todo !== null){
+        const deleteBtn = createElement("button", {
+            innerText: "Delete",
+            attributes: {
+                id: "item-delete",
+                class: "delete-button"
+            },
+            options: {
+                formNoValidate: true
+            }
+        });
+
+        deleteBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            PubSub.publish("DELETE-TODO", {
+                todo
+            });
+            dialog.close();
+        });
+
+        buttonContainer.append(deleteBtn); 
+    }
+
     const submitBtn = createElement("button", {
-        innerText: "Create",
+        innerText: todo === null ? "Create" : "Save",
         attributes: {
             id: "item-submit",
             class: "new-button",
             type: "submit",
         }
     });
-    buttonContainer.append(submitBtn);
-
-    // Event listeners
-    form.addEventListener("submit", (event) => {
-        submitBtn.click();
-    });
 
     submitBtn.addEventListener("click", () => {
         const formData = Object.fromEntries(new FormData(form));
         if(formData.todoName.length === 0) return;
         
-        PubSub.publish("CREATE-TODO", formData.todoName);
+        const eventMsg = todo === null ? "CREATE-TODO" : "UPDATE-TODO";
+        PubSub.publish(eventMsg, {
+            todo,
+            todoName: formData.todoName
+        });
 
         form.reset();
         dialog.close();
     });
+
+    buttonContainer.append(submitBtn);
 
     dialog.showModal();
 }
@@ -581,7 +678,7 @@ function displayItemDialog(todo, item = null){
 }
 
 function createElement(type, elementData = {}){
-    element = document.createElement(type);
+    const element = document.createElement(type);
     
     if(elementData.hasOwnProperty("innerText"))
         element.textContent = elementData.innerText;

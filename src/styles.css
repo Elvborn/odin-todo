@@ -199,10 +199,6 @@ body{
     gap: var(--item-gap);
 }
 
-.todo .content-title{
-    grid-column: span 2;
-}
-
 .item-container{
     --item-content-padding:1rem;
     --item-content-gap:1.5rem;

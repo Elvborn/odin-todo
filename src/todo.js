@@ -11,6 +11,16 @@ function Project(name, description){
         PubSub.publish("UPDATE-CONTENT", getSelectedProject());
     }
 
+    const update = (newName, newDescription) => {
+        name = newName;
+        description = newDescription;
+
+        PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
+        PubSub.publish("UPDATE-SIDE", projects);
+
+    }
+
     const removeTodo = (todo) => {
         if(!todoList.includes(todo)) return;
 
@@ -41,6 +51,7 @@ function Project(name, description){
             selected = value;
         },
         addTodo,
+        update,
         removeTodo
     }
 };
@@ -50,6 +61,13 @@ function Todo(name){
 
     const addItem = (itemName, dueDate, priority) => {
         todoItems.push(TodoItem(itemName, dueDate, priority));
+
+        PubSub.publish("SAVE");
+        PubSub.publish("UPDATE-CONTENT", getSelectedProject());
+    }
+
+    const update = (newName) => {
+        name = newName;
 
         PubSub.publish("SAVE");
         PubSub.publish("UPDATE-CONTENT", getSelectedProject());
@@ -76,6 +94,7 @@ function Todo(name){
             todoItems = value;
         },
         addItem,
+        update,
         removeItem
     }
 }
@@ -165,8 +184,32 @@ PubSub.subscribe("CREATE-PROJECT", (msg, data) => {
     createProject(data.name, data.description);
 });
 
-PubSub.subscribe("CREATE-TODO", (msg, name) => {
-    getSelectedProject().addTodo(name);
+PubSub.subscribe("UPDATE-PROJECT", (msg, data) => {
+    data.project.update(data.name, data.description);
+});
+
+PubSub.subscribe("DELETE-PROJECT", (msg, data) => {
+    console.log(data.project);
+    if(!projects.includes(data.project)) return;
+
+    const index = projects.indexOf(data.project);
+    projects.splice(index, 1);
+
+    PubSub.publish("SAVE");
+    PubSub.publish("UPDATE-CONTENT", getSelectedProject());
+    PubSub.publish("UPDATE-SIDE", projects);
+});
+
+PubSub.subscribe("CREATE-TODO", (msg, data) => {
+    getSelectedProject().addTodo(data.todoName);
+});
+
+PubSub.subscribe("UPDATE-TODO", (msg, data) => {
+    data.todo.update(data.todoName);
+});
+
+PubSub.subscribe("DELETE-TODO", (msg, data) => {
+    getSelectedProject().removeTodo(data.todo);
 });
 
 PubSub.subscribe("ITEM-CHECKBOX-CHANGED", (msg, item) => {
